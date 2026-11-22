@@ -1,0 +1,353 @@
+{
+  "site": {
+    "title": "風力發電教具總站",
+    "version": "1.0",
+    "repo": "https://github.com/fengphy73/wind-teaching-kit"
+  },
+  "designers": [
+    {
+      "id": "blade-mold",
+      "order": 10,
+      "name": "葉片壓模設計器",
+      "purpose": "依站位產生 NACA 2412 葉片，下載可切片的壓模或實心葉片 STL，以及雙層巴沙木雷切 SVG。",
+      "version": "1.3.0",
+      "versionSource": "index.html 的 <title> 與頁首標籤都寫 v1.3.0。此倉庫沒有 package.json。",
+      "commit": "38774f46cfe4631ad52fe2bbef3688f8dc7fc3a7",
+      "outputs": [
+        {"type": "STL", "detail": "上翼面壓模，或完整翼型葉片"},
+        {"type": "雷切 SVG", "detail": "雙層巴沙木，檔名 blade-two-layer-slits.svg"}
+      ],
+      "defaults": [
+        {"label": "葉片長度", "value": "450 mm", "source": "js/model.js DEFAULT_STATIONS 末站 y = 450"},
+        {"label": "葉根", "value": "弦長 73 mm、扭角 0°", "source": "js/model.js DEFAULT_STATIONS 首站"},
+        {"label": "葉尖", "value": "弦長 53 mm、扭角 5.1°", "source": "js/model.js DEFAULT_STATIONS 末站"},
+        {"label": "木片厚度", "value": "2 mm", "source": "js/model.js defaultConfig().wood；index.html #wood"},
+        {"label": "模具背板", "value": "5 mm", "source": "index.html #moldBackThickness；defaultConfig().moldBackThickness"},
+        {"label": "列印機可用長度", "value": "500 mm（450 mm 葉片整支不分段）", "source": "index.html #printer；js/model.js printableSegments"}
+      ],
+      "links": {
+        "open": "https://fengphy73.github.io/blade-mold-designer/",
+        "github": "https://github.com/fengphy73/blade-mold-designer"
+      },
+      "thumbnail": "assets/thumb-blade.png",
+      "thumbnailAlt": "葉片壓模設計器的預設畫面：葉長 450 mm、木片厚度 2 mm、背板 5 mm",
+      "assemblyNodes": [
+        {
+          "id": "blade",
+          "label": "葉片",
+          "order": 10,
+          "detail": "預設長 450 mm",
+          "status": "match"
+        }
+      ],
+      "interfaces": [
+        {
+          "id": "blade-length",
+          "pair": "葉片 ↔ 整機包絡",
+          "dimension": "葉片長度",
+          "mustMatch": "底座用這支長度判斷葉尖會不會超出 Ø100 cm 圓柱，要跟實際做出的葉片一樣長。",
+          "status": "mismatch",
+          "left": {
+            "part": "葉片設計器",
+            "value": "站位從 0 到 450 mm，預設葉長 450 mm。",
+            "source": "blade-mold-designer js/model.js DEFAULT_STATIONS"
+          },
+          "right": {
+            "designerId": "wind-stand",
+            "part": "底座設計器",
+            "value": "預設葉長 430 mm。說明寫再長 5 mm，葉尖就會超出圓柱。",
+            "source": "wind-stand-designer src/calc.mjs DEFAULTS.blade；README 預設段"
+          },
+          "note": "兩邊預設差 20 mm。"
+        },
+        {
+          "id": "blade-root-disc",
+          "pair": "葉片葉根 ↔ 輪轂",
+          "dimension": "葉根外形與輪轂圓盤",
+          "mustMatch": "葉根安裝面要落在輪轂圓盤裡面，或圓盤要蓋住葉根。",
+          "status": "mismatch",
+          "left": {
+            "part": "葉根",
+            "value": "距根部 0 mm 的弦長 73 mm、扭角 0°。完整翼型模式的根部是平面封口，沒有安裝座。",
+            "source": "blade-mold-designer js/model.js DEFAULT_STATIONS；README「完整翼型葉片」"
+          },
+          "right": {
+            "designerId": "wind-stand",
+            "part": "加長輪轂",
+            "value": "圓盤半徑 35 mm（直徑 70 mm）、盤厚 8 mm，輪轂全長 75 mm，柄的半徑 16 mm。",
+            "source": "wind-stand-designer src/calc.mjs HUB_R = 35、HUB_LEN = 75；src/make.mjs buildPrinted"
+          },
+          "note": "葉根弦長 73 mm，大於輪轂直徑 70 mm。"
+        },
+        {
+          "id": "blade-bolts",
+          "pair": "葉片葉根 ↔ 輪轂",
+          "dimension": "鎖孔片數、節圓與孔徑",
+          "mustMatch": "葉片上的鎖孔要跟輪轂圓盤的孔對得起來。",
+          "status": "unconfirmed",
+          "left": {
+            "part": "葉片",
+            "value": "待確認。葉片設計器沒有輪轂鎖孔，根部也沒有安裝座。",
+            "source": "blade-mold-designer README 與 js/ 沒有安裝孔參數"
+          },
+          "right": {
+            "designerId": "wind-stand",
+            "part": "輪轂圓盤",
+            "value": "三片葉，每片兩孔。角度從 90° 起每隔 120°。節圓半徑 22 mm 與 30 mm，孔半徑 2.1 mm（直徑 4.2 mm）。",
+            "source": "wind-stand-designer src/make.mjs buildPrinted"
+          },
+          "note": "只有輪轂一側寫了鎖孔。"
+        }
+      ],
+      "checks": []
+    },
+    {
+      "id": "wind-gear",
+      "order": 20,
+      "name": "風力齒輪設計室",
+      "purpose": "在瀏覽器裡設計單顆漸開線直齒外齒輪，下載單位是毫米的二進位 STL。",
+      "version": "1.3.4",
+      "versionSource": "package.json 的 version 是 1.3.4，src/app.jsx 頁首也顯示 v1.3.4。README 標題仍寫 v1.3.1，同一份 README 的 GitHub Pages 段寫 v1.3.4。以程式為準。",
+      "commit": "e65b1c5322a8fa37072fd3197b5bc33458034a99",
+      "outputs": [
+        {"type": "STL", "detail": "單顆齒輪的二進位 STL，單位 mm"}
+      ],
+      "defaults": [
+        {"label": "齒數", "value": "20", "source": "src/geometry.mjs DEFAULTS.teeth"},
+        {"label": "模數", "value": "1 mm", "source": "src/geometry.mjs DEFAULTS.module"},
+        {"label": "壓力角", "value": "20°", "source": "src/geometry.mjs DEFAULTS.pressure"},
+        {"label": "本體厚度", "value": "7.5 mm", "source": "src/geometry.mjs DEFAULTS.thickness"},
+        {"label": "中心孔", "value": "圓孔，直徑 5 mm", "source": "src/geometry.mjs DEFAULTS.boreType = round、shaftSize = 5"}
+      ],
+      "links": {
+        "open": "https://fengphy73.github.io/wind-gear-studio/",
+        "github": "https://github.com/fengphy73/wind-gear-studio"
+      },
+      "thumbnail": "assets/thumb-gear.png",
+      "thumbnailAlt": "風力齒輪設計室的預設畫面：20 齒、模數 1、厚 7.5 mm、圓孔直徑 5 mm，版號 v1.3.4",
+      "assemblyNodes": [
+        {
+          "id": "gearbox",
+          "label": "主軸／增速齒輪",
+          "order": 30,
+          "detail": "20 齒，圓孔 Ø5 mm",
+          "status": "mismatch"
+        }
+      ],
+      "interfaces": [
+        {
+          "id": "shaft-bore",
+          "pair": "輪轂 ↔ 主軸",
+          "dimension": "主軸直徑與齒輪中心孔",
+          "mustMatch": "同一支主軸要同時穿過輪轂孔和齒輪中心孔。",
+          "status": "mismatch",
+          "left": {
+            "designerId": "wind-stand",
+            "part": "底座的主軸與輪轂孔",
+            "value": "主軸直徑是假設值 6 mm。輪轂孔半徑 = 主軸半徑 + 0.15 mm，孔徑 6.3 mm。孔從輪轂後端往前，圓柱高 30 mm、起點在全長減 28 mm，沒有打穿前面的圓盤。組裝說明寫孔徑請依實測。",
+            "source": "wind-stand-designer src/calc.mjs DEFAULTS.shaftD；src/make.mjs buildPrinted；src/draw.mjs 組裝步驟"
+          },
+          "right": {
+            "part": "齒輪設計室的中心孔",
+            "value": "打開頁面的預設是圓孔，直徑 5 mm。切到六角孔時，對邊距回到 hexSize 6.34 mm；六個快速起點（20、40、50、60、80、100 齒）都用這組六角孔。對角距離 = 對邊距 × 2 / √3，測試寫成 7.32 mm。孔尺寸補償預設 0。原始碼沒有 6.1–6.2 mm 這個範圍。",
+            "source": "wind-gear-studio src/geometry.mjs DEFAULTS、acrossCorners、gearPreset；tests/hex-defaults.mjs"
+          },
+          "note": "圓孔 Ø5 套不進 Ø6 的主軸。六角對邊 6.34 mm 比 Ø6 大 0.34 mm，能不能當作留隙，原始碼沒有寫。"
+        },
+        {
+          "id": "gear-od",
+          "pair": "增速齒輪 ↔ 輪轂高度",
+          "dimension": "齒輪外徑",
+          "mustMatch": "底座用大齒輪外徑估算齒頂會不會碰到別的零件，要跟實際齒輪一樣。",
+          "status": "unconfirmed",
+          "left": {
+            "part": "齒輪設計室預設的那一顆",
+            "value": "20 齒、模數 1、變位 0。dimensions() 的節圓半徑 = 模數 × 齒數 / 2 = 10 mm，齒頂半徑 = 節圓半徑 + 模數 × (1 + 變位) = 11 mm，所以外徑 22 mm。設計室只做單顆齒輪，沒有 25 倍或 30 倍齒輪箱。",
+            "source": "wind-gear-studio src/geometry.mjs DEFAULTS 與 dimensions()"
+          },
+          "right": {
+            "designerId": "wind-stand",
+            "part": "底座假設的大齒輪",
+            "value": "常數 GEAR_OD_80 = 82，註解寫 80 齒外徑、半徑 41，齒頂 = 輪轂高 + 41。25 倍主軸中心高 80 mm，30 倍 85 mm。底座寫齒輪組是執行長自己的設計，這個設計器不改原檔。",
+            "source": "wind-stand-designer src/calc.mjs GEAR_OD_80、SHAFT_25、SHAFT_30；README 輸出段"
+          },
+          "note": "22 mm 與 82 mm 不是同一顆齒輪。待確認實際齒輪箱要用哪一組尺寸。"
+        }
+      ],
+      "checks": []
+    },
+    {
+      "id": "wind-stand",
+      "order": 30,
+      "name": "底座支架設計器",
+      "purpose": "依 KidWind 2026 方案 D 排出雷切方管塔、偏航平台、尾翼與加長輪轂，並下載 SVG 與 STL。",
+      "version": "1.0.0",
+      "versionSource": "package.json 的 version，以及 src/calc.mjs 的 VERSION，都是 1.0.0。頁首顯示 v1.0.0。",
+      "commit": "c16d3dad3cc2828ef3cf6942c58696b0edc66546",
+      "outputs": [
+        {"type": "雷切 SVG", "detail": "兩張，各 900×600 mm；紅線切割、藍線雕刻"},
+        {"type": "STL", "detail": "加長輪轂、限位環、限位擋銷、尾桿座"}
+      ],
+      "defaults": [
+        {"label": "方管", "value": "邊長 50 mm、板厚 5 mm、隔板 2 片", "source": "src/calc.mjs DEFAULTS.tube、thickness、diaphragms"},
+        {"label": "底板", "value": "600 mm 見方", "source": "src/calc.mjs DEFAULTS.base"},
+        {"label": "葉長", "value": "430 mm", "source": "src/calc.mjs DEFAULTS.blade；README 預設段"},
+        {"label": "輪轂中心高", "value": "520 mm", "source": "src/calc.mjs DEFAULTS.hubZ"},
+        {"label": "主軸", "value": "假設直徑 6 mm；25 倍主軸中心高 80 mm", "source": "src/calc.mjs DEFAULTS.shaftD、gear，SHAFT_25"},
+        {"label": "轉盤", "value": "說明稱為 3 寸全珠轉盤。幾何：外廓 71 mm、厚 8.8 mm、中孔 35.5 mm、螺栓孔 4.1 mm、節圓半徑 41 mm", "source": "README 與 src/app.mjs 的「3 寸」；src/calc.mjs TURN"}
+      ],
+      "computed": [
+        {"label": "葉尖半徑", "value": "497.7 mm（上限 500，餘裕 2.3 mm）", "source": "對 DEFAULTS 呼叫 src/calc.mjs compute()，tipR 取一位小數"},
+        {"label": "最高點", "value": "985 mm（上限 1000，餘裕 15 mm）", "source": "compute().env.topZ，與頁面相同取整數"},
+        {"label": "塔頂面", "value": "426.2 mm", "source": "compute().zT = 輪轂高 520 − 主軸中心高 80 − 板厚 5 − 轉盤厚 8.8"}
+      ],
+      "links": {
+        "open": "https://fengphy73.github.io/wind-stand-designer/",
+        "github": "https://github.com/fengphy73/wind-stand-designer"
+      },
+      "thumbnail": "assets/thumb-stand.png",
+      "thumbnailAlt": "底座支架設計器的預設畫面：方管 50、葉長 430、輪轂中心高 520、最高點 985 mm",
+      "assemblyNodes": [
+        {"id": "hub", "label": "輪轂", "order": 20, "detail": "半徑 35 mm，長 75 mm", "status": "match"},
+        {"id": "generator", "label": "發電機", "order": 40, "detail": "待確認，沒有尺寸", "status": "unconfirmed"},
+        {"id": "platform", "label": "偏航平台", "order": 50, "detail": "250×110 mm", "status": "match"},
+        {"id": "turntable", "label": "轉盤", "order": 60, "detail": "節圓半徑 41 mm", "status": "match"},
+        {"id": "tower", "label": "塔", "order": 70, "detail": "50×50 方管", "status": "match"},
+        {"id": "base", "label": "底板", "order": 80, "detail": "600×600 mm", "status": "match"}
+      ],
+      "interfaces": [
+        {
+          "id": "plate-platform",
+          "pair": "齒輪組底板 ↔ 偏航平台",
+          "dimension": "底板外形與四個固定孔",
+          "mustMatch": "齒輪底板的長寬和四個鎖孔，要落在平台畫出的範圍與孔位上。",
+          "status": "unconfirmed",
+          "left": {
+            "designerId": "wind-gear",
+            "part": "齒輪設計室",
+            "value": "待確認。設計室沒有底板，也沒有四孔安裝距。",
+            "source": "wind-gear-studio src/ 只產生單顆齒輪"
+          },
+          "right": {
+            "part": "偏航平台上的齒輪範圍",
+            "value": "足跡長 190 mm、寬 100 mm、厚 10 mm。四個固定孔在足跡四角內縮 16 mm，孔半徑 2.1 mm（直徑 4.2 mm）。平台本身 250×110 mm，板厚用夾板，預設 5 mm。平台偏航軸中孔直徑 25 mm。雕刻字建議在齒輪底板的偏航軸另開 Ø20，而且不要改齒輪組原檔。",
+            "source": "wind-stand-designer src/calc.mjs GEAR_PLATE、PLAT；src/make.mjs platformGeom"
+          },
+          "note": "平台側有尺寸，齒輪底板側沒有對應的程式。"
+        },
+        {
+          "id": "bolt-circle",
+          "pair": "塔頂 ↔ 轉盤",
+          "dimension": "螺栓節圓半徑",
+          "mustMatch": "轉盤、塔頂、偏航平台的螺栓要在同一個節圓上。轉盤相對方柱轉 45°，孔才會落在塔頂的十字方向。",
+          "status": "match",
+          "left": {
+            "part": "塔頂與偏航平台",
+            "value": "塔頂四孔在 0°、90°、180°、270°，半徑 41 mm。平台四孔在 45°、135°、225°、315°，半徑同樣 41 mm。塔頂板預設 96×96 mm，因為 80×80 放不下這個節圓。",
+            "source": "wind-stand-designer src/calc.mjs TURN.boltR、topSize；src/make.mjs 塔頂與 platformGeom；README"
+          },
+          "right": {
+            "part": "3 寸轉盤",
+            "value": "TURN.boltR = 41 mm。",
+            "source": "wind-stand-designer src/calc.mjs TURN"
+          },
+          "note": "三處節圓半徑都是 41 mm。45° 的相對轉角寫在組裝步驟裡。"
+        },
+        {
+          "id": "bolt-hole",
+          "pair": "塔頂 ↔ 轉盤",
+          "dimension": "螺栓孔徑",
+          "mustMatch": "同一支螺栓要穿過轉盤孔、塔頂上板和平台孔。",
+          "status": "mismatch",
+          "left": {
+            "part": "塔頂上板與偏航平台",
+            "value": "通孔半徑 2.1 mm，直徑 4.2 mm。塔頂下板是螺帽讓位，六角對邊 7.2 mm。",
+            "source": "wind-stand-designer src/make.mjs 塔頂 bolts 與 platformGeom"
+          },
+          "right": {
+            "part": "轉盤",
+            "value": "TURN.holeD = 4.1 mm。",
+            "source": "wind-stand-designer src/calc.mjs TURN.holeD"
+          },
+          "note": "4.1 mm 和 4.2 mm 差 0.1 mm。原始碼沒有寫這 0.1 mm 可以忽略。"
+        },
+        {
+          "id": "center-bore",
+          "pair": "塔頂 ↔ 轉盤",
+          "dimension": "中心開孔",
+          "mustMatch": "若中心要當成同一條通道，孔徑要一致；若只是各做各的讓位，就要在圖上寫清楚。",
+          "status": "unconfirmed",
+          "left": {
+            "part": "塔頂、限位環、平台",
+            "value": "塔頂中孔直徑 34 mm。限位環外徑 33.2 mm、內徑 18 mm，要放進塔頂中孔。平台偏航軸中孔直徑 25 mm。",
+            "source": "wind-stand-designer src/calc.mjs TOP_HOLE、PLAT.hole；src/make.mjs 限位環 ringOD = 33.2"
+          },
+          "right": {
+            "part": "轉盤",
+            "value": "TURN.bore = 35.5 mm。",
+            "source": "wind-stand-designer src/calc.mjs TURN.bore"
+          },
+          "note": "34、35.5、25 三個數不一樣。原始碼沒有把它們定義成同一個孔，先標待確認。"
+        }
+      ],
+      "checks": [
+        {
+          "id": "envelope",
+          "title": "Ø100 cm × 高 100 cm 圓柱包絡",
+          "status": "pass",
+          "detail": "圓柱半徑 500 mm、高 1000 mm。用預設參數計算：葉尖半徑 497.7 mm（餘裕 2.3 mm），尾翼最遠 470 mm，底板對角約 424 mm，最高點 985 mm（餘裕 15 mm）。以轉盤頂面為準，頁面判定在圓柱內。",
+          "source": "src/calc.mjs CYL_R、CYL_H；對 DEFAULTS 呼叫 compute()。src/app.mjs 合格說明用的就是這組數字。"
+        },
+        {
+          "id": "height-datum",
+          "title": "高度若從風洞地面起算",
+          "status": "warn",
+          "detail": "頁面寫：若高度從風洞地面起算、再加 10 cm 大會轉盤，最高 1085 mm，超出 85 mm。條文沒寫從哪裡起算。以轉盤頂面為準，目前合格。加 5 cm 時最高 1035 mm，超出 35 mm。",
+          "source": "src/app.mjs 地面起算那段警告；compute() 的 env.ground100 與 ground50。"
+        },
+        {
+          "id": "official-generator",
+          "title": "必須用大會發電機",
+          "status": "unconfirmed",
+          "detail": "待確認。wind-stand-designer 的 README、src/app.mjs、src/calc.mjs、src/draw.mjs、src/make.mjs 都沒有寫「必須用大會發電機」，也沒有發電機的型號或安裝尺寸。",
+          "source": "對該倉庫 main（c16d3dad）全文檢索「發電機」，沒有比賽條文。"
+        },
+        {
+          "id": "tunnel-support",
+          "title": "兩風洞間主支撐不可換",
+          "status": "unconfirmed",
+          "detail": "待確認。同一份原始碼沒有這條規則。畫面上和「支撐」有關的句子只有：推力計算的支撐距離取底板半邊。",
+          "source": "src/app.mjs「支撐距離取底板半邊」。"
+        },
+        {
+          "id": "gear-file",
+          "title": "齒輪組原檔不在這個設計器裡改",
+          "status": "pass",
+          "detail": "底座只標示安裝範圍和建議穿線孔。組裝步驟寫：穿線若要過齒輪底板，請另存新檔，在偏航軸開 Ø20，不要改原設計。",
+          "source": "README 輸出段；src/draw.mjs STEPS；src/make.mjs 平台雕刻文字。"
+        },
+        {
+          "id": "ratios",
+          "title": "25 倍與 30 倍都可以",
+          "status": "pass",
+          "detail": "預設是 25 倍，主軸中心高 80 mm。30 倍主軸中心高 85 mm，同一輪轂高度下塔頂再低 5 mm。葉長不隨倍率改變。",
+          "source": "src/calc.mjs SHAFT_25、SHAFT_30；README 預設段；src/app.mjs 說明文字。"
+        },
+        {
+          "id": "top-plate",
+          "title": "塔頂板用 96×96，不用 80×80",
+          "status": "pass",
+          "detail": "核准圖的 80×80 放不下十字方向、節圓半徑 41 mm 的安裝孔，所以預設做成 96×96。方管 50 mm 時，topSize = max(96, 向上取整(50 + 16)) = 96。",
+          "source": "README 預設段；src/calc.mjs compute() 的 topSize。"
+        },
+        {
+          "id": "yaw",
+          "title": "偏航約 ±170°",
+          "status": "pass",
+          "detail": "組裝後先用手轉一圈，確認約 ±170°。程式常數 YAW_LIMIT = 170。",
+          "source": "src/calc.mjs YAW_LIMIT；src/draw.mjs STEPS。"
+        }
+      ]
+    }
+  ]
+}

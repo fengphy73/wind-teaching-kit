@@ -1,0 +1,10 @@
+{
+  "name": "wind-teaching-kit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "風力發電教具總站",
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/validate.mjs"
+  }
+}
