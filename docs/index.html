@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>風力發電教具總站</title>
+  <meta name="description" content="給執行長的風力發電教具入口：葉片、齒輪與底座設計器的卡片、接口對照、組裝關係與 KidWind 2026 檢核。">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+  <a class="skip" href="#main">跳到內容</a>
+  <header class="mast">
+    <div class="mast-inner">
+      <p class="eyebrow" id="eyebrow">風力發電教具</p>
+      <h1 id="site-title">風力發電教具總站</h1>
+      <p class="lede" id="lede">執行長，三個設計器都從這裡進去。總站只做串連，各設計器仍在自己的倉庫裡改。</p>
+      <nav class="toc" aria-label="頁面章節">
+        <a href="#designers">設計器</a>
+        <a href="#interfaces">接口對照</a>
+        <a href="#assembly">組裝關係</a>
+        <a href="#checks">KidWind 檢核</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <p class="status" id="status" role="status">正在讀取設計器資料…</p>
+    <section id="designers" aria-labelledby="designers-title" hidden>
+      <div class="section-head">
+        <h2 id="designers-title">設計器</h2>
+        <p>每一張卡片都來自資料檔的一筆。新增一筆，這裡就多一張。</p>
+      </div>
+      <div class="cards" id="card-list"></div>
+    </section>
+    <section id="interfaces" aria-labelledby="interfaces-title" hidden>
+      <div class="section-head">
+        <h2 id="interfaces-title">元件接口對照</h2>
+        <p>標出要兩邊一致的尺寸。黃底是不一致，或原始碼沒寫到、先標待確認。</p>
+      </div>
+      <ul class="legend">
+        <li><span class="swatch ok"></span>一致</li>
+        <li><span class="swatch alert"></span>不一致或待確認</li>
+      </ul>
+      <div class="table-wrap" id="joint-table"></div>
+      <div class="joint-cards" id="joint-cards"></div>
+    </section>
+    <section id="assembly" aria-labelledby="assembly-title" hidden>
+      <div class="section-head">
+        <h2 id="assembly-title">整機組裝關係</h2>
+        <p>箭頭順序來自每一筆設計器的組裝節點。虛線框是尺寸還沒有著落的零件。</p>
+      </div>
+      <div class="flow-scroll" id="flow"></div>
+      <ol class="flow-list" id="flow-list"></ol>
+    </section>
+    <section id="checks" aria-labelledby="checks-title" hidden>
+      <div class="section-head">
+        <h2 id="checks-title">KidWind 2026 檢核摘要</h2>
+        <p>只收底座設計器寫明的項目。原始碼沒有的條文標成待確認，不另外補規則。</p>
+      </div>
+      <div class="checks" id="check-list"></div>
+    </section>
+  </main>
+  <footer class="colophon">
+    <p id="colophon-text"></p>
+  </footer>
+  <script type="module" src="js/site.js"></script>
+</body>
+</html>
